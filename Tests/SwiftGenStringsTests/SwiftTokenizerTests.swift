@@ -6,13 +6,13 @@ class SwiftTokenizerTests: XCTestCase {
     let tokenizer = SwiftTokenizer()
 
     func testTokenizer() {
-        let string = "func something { return NSLocalizedString(\"KEY\", value: \"Quotes in \\\" the middle\", comment: \"COMMENT\") }"
+        let string = "func something { return Localized(\"KEY\", value: \"Quotes in \\\" the middle\", comment: \"COMMENT\") }"
         let tokens = tokenizer.tokenizeSwiftString(string)
         XCTAssertEqual(17, tokens.count)
     }
 
-    func testTokenizerWithDesignedNSLocalizedStringInit() {
-        let string = "NSLocalizedString(\"\", tableName: nil, bundle: NSBundle.mainBundle(), value: \"\", comment: \"\")"
+    func testTokenizerWithDesignedLocalizedInit() {
+        let string = "Localized(\"\", tableName: nil, bundle: NSBundle.mainBundle(), value: \"\", comment: \"\")"
         let tokens = tokenizer.tokenizeSwiftString(string)
         XCTAssertEqual(24, tokens.count)
     }
@@ -60,14 +60,14 @@ class SwiftTokenizerTests: XCTestCase {
     }
 
     func testTokenizerMultiLineStringLiteral() {
-        let string = "NSLocalizedString(\n\t\"\"\"\n\tHere is some multi-line text \\\n\tMore text here\n\t\"\"\",\n\tcomment: \"bla bla\")"
+        let string = "Localized(\n\t\"\"\"\n\tHere is some multi-line text \\\n\tMore text here\n\t\"\"\",\n\tcomment: \"bla bla\")"
         let tokens = tokenizer.tokenizeSwiftString(string)
         XCTAssertEqual(8, tokens.count)
         XCTAssertEqual(tokens[2], SwiftLanguageToken.text(text: "Here is some multi-line text More text here"))
     }
     
     func testTokenizerMultiLineStringLiteralEscapesNewline() {
-        let string = "NSLocalizedString(\n\t\"\"\"\n\tHere is some multi-line text\nwith newline\n\"\"\",\n\tcomment: \"bla bla\")"
+        let string = "Localized(\n\t\"\"\"\n\tHere is some multi-line text\nwith newline\n\"\"\",\n\tcomment: \"bla bla\")"
         let tokens = tokenizer.tokenizeSwiftString(string)
         XCTAssertEqual(8, tokens.count)
         XCTAssertEqual(tokens[2], SwiftLanguageToken.text(text: "Here is some multi-line text\\nwith newline"))

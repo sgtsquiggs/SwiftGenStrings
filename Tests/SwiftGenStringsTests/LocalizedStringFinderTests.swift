@@ -6,29 +6,9 @@ class LocalizedStringFinderTests: XCTestCase {
     func testFindStringsWithTableNameAndBundle() {
         let finder = LocalizedStringFinder()
         let tokens: [SwiftLanguageToken] = [
-            .identifier("NSLocalizedString"),
+            .identifier("Localized"),
             .parenthesisOpen,
             .text(text: "KEY"),
-            .comma,
-            .identifier("tableName"),
-            .colon,
-            .identifier("nil"),
-            .comma,
-            .identifier("bundle"),
-            .colon,
-            .identifier("NSBundle"),
-            .dot,
-            .identifier("mainBundle"),
-            .parenthesisOpen,
-            .parenthesisClose,
-            .comma,
-            .identifier("value"),
-            .colon,
-            .text(text: "VALUE"),
-            .comma,
-            .identifier("comment"),
-            .colon,
-            .text(text: "COMMENT"),
             .parenthesisClose
         ]
 
@@ -37,8 +17,7 @@ class LocalizedStringFinderTests: XCTestCase {
 
         let localizedString = localizedStrings.first!
         XCTAssertEqual("KEY", localizedString.key)
-        XCTAssertEqual("VALUE", localizedString.value)
-        XCTAssertEqual("COMMENT", localizedString.comments.first!)
+        XCTAssertEqual("KEY", localizedString.value)
     }
 
 }

@@ -7,17 +7,20 @@ class RealWorldStringsTests: XCTestCase {
 
     // MARK: - Tests
 
-    func testSimpleLocalizedStrings() {
-        verify(foundLocalizedString: LocalizedString(key: "k", value: "k", comments: ["c"]), in: "NSLocalizedString(\"k\", comment: \"c\")")
-        verify(foundLocalizedString: LocalizedString(key: "k", value: "v", comments: ["c"]), in: "NSLocalizedString(\"k\", value: \"v\", comment: \"c\")")
+    func testLocalized() {
+        verify(foundLocalizedString: LocalizedString(key: "k", value: "k", comments: [""]), in: "Localized(\"k\")")
+    }
+
+    func testLocalizedFormatted() {
+        verifyFormatted(foundLocalizedString: LocalizedString(key: "%@ %@", value: "%@ %@", comments: [""]), in: "LocalizedFormatted(\"%@ %@\", a, b)")
     }
 
     func testLocalizedStringWithNewlinesBetweenArguments() {
-        verify(foundLocalizedString: LocalizedString(key: "k", value: "k", comments: ["c"]), in: "NSLocalizedString(\n\"k\", \ncomment: \"c\"\n)")
+        verify(foundLocalizedString: LocalizedString(key: "k", value: "k", comments: [""]), in: "Localized(\n\"k\"\n)")
     }
 
     func testLocalizedStringWithIdentifierInsteadOfString() {
-        verifyNoLocalizedString(in: "NSLocalizedString(dateFormatter.format(date) + \" k\", value: \"Hello world!\", comment: \"\")")
+        verifyNoLocalizedString(in: "Localized(dateFormatter.format(date) + \" k\")")
         XCTAssertEqual(["dateFormatter"], errorOutput.invalidIdentifiers)
     }
 
@@ -38,8 +41,8 @@ class RealWorldStringsTests: XCTestCase {
             foundLocalizedString: LocalizedString(
                 key: "Here is some multi-line text More text here",
                 value: "Here is some multi-line text More text here",
-                comments: ["c"]),
-            in: "NSLocalizedString(\"\"\"\n\tHere is some multi-line text \\\n\tMore text here\n\t\"\"\", comment: \"c\")")
+                comments: [""]),
+            in: "Localized(\"\"\"\n\tHere is some multi-line text \\\n\tMore text here\n\t\"\"\")")
     }
 
     func testEmojiInIdentifierWithoutLocalizedString() {
@@ -57,6 +60,12 @@ class RealWorldStringsTests: XCTestCase {
         XCTAssert(expected == strings.first, "Expected \(expected), found \(strings.first?.description ?? "nil")")
     }
 
+    private func verifyFormatted(foundLocalizedString expected: LocalizedString, in contents: String) {
+        let strings = findLocalizedFormattedStrings(in: contents)
+        XCTAssertEqual(1, strings.count)
+        XCTAssert(expected == strings.first, "Expected \(expected), found \(strings.first?.description ?? "nil")")
+    }
+
     private func verifyNoLocalizedString(in contents: String) {
         let strings = findLocalizedStrings(in: contents)
         XCTAssert(strings.isEmpty)
@@ -65,6 +74,11 @@ class RealWorldStringsTests: XCTestCase {
     private func findLocalizedStrings(in contents: String) -> [LocalizedString] {
         let tokens = SwiftTokenizer().tokenizeSwiftString(contents)
         return LocalizedStringFinder(errorOutput: errorOutput).findLocalizedStrings(tokens)
+    }
+
+    private func findLocalizedFormattedStrings(in contents: String) -> [LocalizedString] {
+        let tokens = SwiftTokenizer().tokenizeSwiftString(contents)
+        return LocalizedStringFinder(routine: "LocalizedFormatted", errorOutput: errorOutput).findLocalizedStrings(tokens)
     }
 
     private func loadFileResource(named name: String) throws -> String {

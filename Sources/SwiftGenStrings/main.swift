@@ -6,7 +6,7 @@ struct SwiftGenStrings: ParsableCommand {
 
     private static var abstract = """
     SwiftGenStrings is a command line application that can be used as a drop-in replacement for the standard genstrings command for Swift sources.
-    The latter only supports the short form of the NSLocalizedString function but breaks as soon as you use any parameters other than key and comment as in
+    The latter only supports the short form of the Localized function but breaks as soon as you use any parameters other than key and comment as in
     """
 
     static let configuration = CommandConfiguration(
@@ -19,7 +19,7 @@ struct SwiftGenStrings: ParsableCommand {
     @Argument(help: "List of files, that are used as source of Localizable.strings generation.")
     var files: [URL]
 
-    @Option(name: .short, help: "(Optional) Substitute for NSLocalizedString, useful when different macro is used.")
+    @Option(name: .short, help: "(Optional) Substitute for Localized, useful when different macro is used.")
     var substitute: String?
 
     @Option(name: .short, help: "(Optional) Specifies what directory Localizable.strings table is created in. Not specifying output directory will print script output content to standard output (console).")
@@ -45,10 +45,13 @@ struct SwiftGenStrings: ParsableCommand {
             let contents = try String(contentsOf: file)
             let tokens = tokenizer.tokenizeSwiftString(contents)
             let errorOutput = LocalizedStringFinderStandardErrorOutput(fileURL: file)
-            let finder = LocalizedStringFinder(routine: substitute ?? "NSLocalizedString", errorOutput: errorOutput)
-            let strings = finder.findLocalizedStrings(tokens)
-            let collection = LocalizedStringCollection(strings: strings, errorOutput: collectionErrorOutput)
-            finalStrings.merge(with: collection)
+            let routines = substitute != nil ? [substitute!] : ["Localized", "LocalizedFormatted"]
+            for routine in routines {
+                let finder = LocalizedStringFinder(routine: routine, errorOutput: errorOutput)
+                let strings = finder.findLocalizedStrings(tokens)
+                let collection = LocalizedStringCollection(strings: strings, errorOutput: collectionErrorOutput)
+                finalStrings.merge(with: collection)
+            }
             numberOfWrittenErrors += errorOutput.numberOfWrittenErrors + collectionErrorOutput.numberOfWrittenErrors
         }
 

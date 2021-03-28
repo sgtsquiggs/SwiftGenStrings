@@ -23,7 +23,7 @@ public class LocalizedStringFinder {
 
     private var result: [LocalizedString] = []
 
-    public init(routine: String = "NSLocalizedString", errorOutput: LocalizedStringFinderErrorOutput? = nil) {
+    public init(routine: String = "Localized", errorOutput: LocalizedStringFinderErrorOutput? = nil) {
         self.routine = routine
         self.errorOutput = errorOutput
     }
@@ -41,7 +41,8 @@ public class LocalizedStringFinder {
                 openedParenthesis -= 1
                 processEnd()
             default:
-                break
+                continue
+//                break
             }
         }
         return result
@@ -57,16 +58,8 @@ public class LocalizedStringFinder {
             key = ""
             value = ""
             comment = ""
-        case "tableName":
-            argument = .tableName
-        case "bundle":
-            argument = .bundle
-        case "value":
-            argument = .value
-        case "comment":
-            argument = .comment
         default:
-            if parsingLocalizedString && argument.isTextOnly && !invalidLocalizedString {
+            if key == "" && parsingLocalizedString && !invalidLocalizedString {
                 invalidLocalizedString = true
                 errorOutput?.invalidIdentifier(identifier)
             }
@@ -77,14 +70,6 @@ public class LocalizedStringFinder {
         switch argument {
         case .key:
             key += text
-        case .tableName:
-            break // Ignored
-        case .bundle:
-            break // Ignored
-        case .value:
-            value += text
-        case .comment:
-            comment += text
         }
     }
 
@@ -130,19 +115,6 @@ public class LocalizedStringFinder {
 
     private enum Argument {
         case key
-        case tableName
-        case bundle
-        case value
-        case comment
-
-        var isTextOnly: Bool {
-            switch self {
-            case .key, .value, .comment:
-                return true
-            case .tableName, .bundle:
-                return false
-            }
-        }
     }
 
 }
